@@ -1,0 +1,77 @@
+name: TruthSocial Monitor
+
+on:
+  schedule:
+    # GitHub Actions 对定时任务存在抖动，且不适合严格 1 分钟高频。
+    # 实际建议按 5 分钟运行。
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: truthsocial-monitor
+  cancel-in-progress: false
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Restore state cache
+        id: state-cache-restore
+        uses: actions/cache/restore@v4
+        with:
+          path: .github/state/truthsocial_state.json
+          key: truthsocial-state-${{ github.run_id }}
+          restore-keys: |
+            truthsocial-state-
+
+      - name: Prepare state file
+        run: |
+          mkdir -p .github/state
+          if [ ! -f .github/state/truthsocial_state.json ]; then
+            echo '{}' > .github/state/truthsocial_state.json
+          fi
+
+      - name: Build .env
+        run: |
+          cat > .env <<EOF
+          TRUTH_BASE_URL=https://truthsocial.com
+          TRUTH_ACCOUNT_HANDLE=realDonaldTrump
+          TRUTH_EXCLUDE_REPLIES=true
+          TRUTH_EXCLUDE_REBLOGS=true
+          POLL_SECONDS=60
+          REQUEST_TIMEOUT=30
+          TIMEZONE=Asia/Shanghai
+          ALERT_ON_STARTUP=false
+          ENABLE_ARCHIVE_FALLBACK=true
+          ARCHIVE_RSS_URL=https://trumpstruth.org/feed
+          STATE_FILE=./.github/state/truthsocial_state.json
+          ANALYSIS_MODEL=gpt-5-mini
+          ANALYSIS_PROMPT_FILE=./analysis_prompt.txt
+          FEISHU_WEBHOOK=${{ secrets.FEISHU_WEBHOOK }}
+          OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+          # 可选：如官方 lookup 不稳定可设置这个 Secret
+          TRUTH_ACCOUNT_ID=${{ secrets.TRUTH_ACCOUNT_ID }}
+          EOF
+
+      - name: Run monitor once
+        run: python3 truthsocial_monitor.py --once
+
+      - name: Save state cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: .github/state/truthsocial_state.json
+          key: truthsocial-state-${{ github.run_id }}

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>美国失业救济申请追踪</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <div class="bg-orb orb-1"></div>
+  <div class="bg-orb orb-2"></div>
+
+  <main class="container">
+    <header class="top">
+      <div>
+        <p class="eyebrow">Macro View · Local Dashboard</p>
+        <h1>美国初请与续请失业救济金</h1>
+        <p class="sub">数据源：MacroMicro 图表 19（本地抓取）</p>
+      </div>
+      <div class="last-update" id="lastUpdate">加载中…</div>
+    </header>
+
+    <section class="cards" id="cards"></section>
+
+    <section class="panel">
+      <div class="toolbar">
+        <div class="range-buttons" id="rangeButtons">
+          <button data-range="1Y">1Y</button>
+          <button data-range="3Y">3Y</button>
+          <button data-range="5Y">5Y</button>
+          <button data-range="10Y">10Y</button>
+          <button data-range="ALL" class="active">ALL</button>
+        </div>
+        <div class="hint">拖拽底部滑块可放大区间</div>
+      </div>
+      <div id="chart" class="chart"></div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>

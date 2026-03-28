@@ -1,0 +1,6 @@
+.env
+__pycache__/
+*.pyc
+.github/state/*.json
+outputs/truthsocial_monitor.log
+.tmp_chrome_profile/
