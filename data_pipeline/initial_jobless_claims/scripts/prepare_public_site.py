@@ -2,7 +2,8 @@
 import shutil
 from pathlib import Path
 
-ROOT = Path('/Users/freedom33/Documents/New project/data_pipeline/initial_jobless_claims')
+# Resolve paths relative to this script so it works on any machine/CI runner.
+ROOT = Path(__file__).resolve().parents[1]
 DASH = ROOT / 'dashboard'
 DATA = ROOT / 'data' / 'raw' / 'macromicro' / 'chart19_all_series_latest.csv'
 OUT = ROOT / 'public_site'
