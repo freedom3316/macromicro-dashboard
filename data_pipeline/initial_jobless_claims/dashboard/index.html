@@ -14,11 +14,16 @@
   <div class="bg-orb orb-2"></div>
 
   <main class="container">
+    <section class="chart-tabs" id="chartTabs">
+      <button class="chart-tab active" data-dashboard="claims">初请/续请失业救济金</button>
+      <button class="chart-tab" data-dashboard="nonfarm">非农 vs GDP（年变动）</button>
+    </section>
+
     <header class="top">
       <div>
         <p class="eyebrow">Macro View · Local Dashboard</p>
-        <h1>美国初请与续请失业救济金</h1>
-        <p class="sub">数据源：MacroMicro 图表 19（本地抓取）</p>
+        <h1 id="dashboardTitle">美国初请与续请失业救济金</h1>
+        <p class="sub" id="dashboardSubtitle">数据源：MacroMicro 图表 19（本地抓取）</p>
       </div>
       <div class="last-update" id="lastUpdate">加载中…</div>
     </header>
