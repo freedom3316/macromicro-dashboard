@@ -7,8 +7,18 @@ const DASHBOARDS = {
       '../data/raw/macromicro/chart19_all_series_latest.csv',
       '/data/raw/macromicro/chart19_all_series_latest.csv',
     ],
-    seriesOrder: ['series_0', 'series_1', 'series_2'],
+    seriesOrder: [
+      'initial_jobless_claims',
+      'continuing_jobless_claims',
+      'initial_jobless_claims_4w_avg',
+      'series_0',
+      'series_1',
+      'series_2',
+    ],
     seriesMeta: {
+      initial_jobless_claims: { name: '初请失业救济金', color: '#2356a8', yAxisIndex: 0 },
+      continuing_jobless_claims: { name: '续请失业救济金', color: '#ef7d2f', yAxisIndex: 0 },
+      initial_jobless_claims_4w_avg: { name: '初请4周均值', color: '#0f766e', yAxisIndex: 0 },
       series_0: { name: '初请失业救济金', color: '#2356a8' },
       series_1: { name: '续请失业救济金', color: '#ef7d2f' },
       series_2: { name: '初请4周均值', color: '#0f766e' },
@@ -24,8 +34,8 @@ const DASHBOARDS = {
     ],
     seriesOrder: ['series_0', 'series_1'],
     seriesMeta: {
-      series_0: { name: '非农就业（年变动）', color: '#8e44ad' },
-      series_1: { name: 'GDP（年变动）', color: '#16a085' },
+      series_0: { name: '非农就业（千人，年变动）', color: '#8e44ad', yAxisIndex: 0 },
+      series_1: { name: 'GDP（年变动，%）', color: '#16a085', yAxisIndex: 1 },
     },
   },
 };
@@ -118,12 +128,14 @@ function buildSeries(rows, config) {
       showSymbol: false,
       lineStyle: { width: 2, color: meta.color },
       emphasis: { focus: 'series' },
+      yAxisIndex: meta.yAxisIndex || 0,
       data: subset,
     };
   });
 }
 
 function renderChart(rows, config) {
+  const isNonfarm = currentDashboardKey === 'nonfarm';
   chart.setOption({
     animationDuration: 700,
     grid: { left: 56, right: 24, top: 46, bottom: 64 },
@@ -141,20 +153,37 @@ function renderChart(rows, config) {
       axisLabel: { color: '#667085' },
       axisLine: { lineStyle: { color: '#d0d5dd' } },
     },
-    yAxis: {
-      type: 'value',
-      axisLabel: {
-        color: '#667085',
-        formatter: (v) => {
-          const av = Math.abs(v);
-          if (av >= 1000000000) return `${(v / 1000000000).toFixed(1)}B`;
-          if (av >= 1000000) return `${(v / 1000000).toFixed(1)}M`;
-          if (av >= 1000) return `${Math.round(v / 1000)}k`;
-          return `${v}`;
+    yAxis: isNonfarm
+      ? [
+          {
+            type: 'value',
+            name: '非农（千人）',
+            nameTextStyle: { color: '#667085' },
+            axisLabel: { color: '#667085', formatter: (v) => `${v}` },
+            splitLine: { lineStyle: { color: '#e4e7ec', type: 'dashed' } },
+          },
+          {
+            type: 'value',
+            name: 'GDP 年变动（%）',
+            nameTextStyle: { color: '#667085' },
+            axisLabel: { color: '#667085', formatter: (v) => `${v}%` },
+            splitLine: { show: false },
+          },
+        ]
+      : {
+          type: 'value',
+          axisLabel: {
+            color: '#667085',
+            formatter: (v) => {
+              const av = Math.abs(v);
+              if (av >= 1000000000) return `${(v / 1000000000).toFixed(1)}B`;
+              if (av >= 1000000) return `${(v / 1000000).toFixed(1)}M`;
+              if (av >= 1000) return `${Math.round(v / 1000)}k`;
+              return `${v}`;
+            },
+          },
+          splitLine: { lineStyle: { color: '#e4e7ec', type: 'dashed' } },
         },
-      },
-      splitLine: { lineStyle: { color: '#e4e7ec', type: 'dashed' } },
-    },
     dataZoom: [
       { type: 'inside', throttle: 50 },
       { type: 'slider', height: 24, bottom: 14 },
