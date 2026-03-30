@@ -16,12 +16,12 @@ const DASHBOARDS = {
       'series_2',
     ],
     seriesMeta: {
-      initial_jobless_claims: { name: '初请失业救济金', color: '#2356a8', yAxisIndex: 0 },
-      continuing_jobless_claims: { name: '续请失业救济金', color: '#ef7d2f', yAxisIndex: 0 },
-      initial_jobless_claims_4w_avg: { name: '初请4周均值', color: '#0f766e', yAxisIndex: 0 },
-      series_0: { name: '初请失业救济金', color: '#2356a8' },
-      series_1: { name: '续请失业救济金', color: '#ef7d2f' },
-      series_2: { name: '初请4周均值', color: '#0f766e' },
+      initial_jobless_claims: { name: '美国-初次申请失业救济金人数(SA)', color: '#3bafda', yAxisIndex: 0, chartType: 'line' },
+      continuing_jobless_claims: { name: '美国-连续申请失业救济金人数(SA)', color: '#e9573f', yAxisIndex: 0, chartType: 'line' },
+      initial_jobless_claims_4w_avg: { name: '美国-4周平均初次申请救济金人数(SA)', color: '#3b3f4f', yAxisIndex: 0, chartType: 'line' },
+      series_0: { name: '美国-初次申请失业救济金人数(SA)', color: '#3bafda', yAxisIndex: 0, chartType: 'line' },
+      series_1: { name: '美国-连续申请失业救济金人数(SA)', color: '#e9573f', yAxisIndex: 0, chartType: 'line' },
+      series_2: { name: '美国-4周平均初次申请救济金人数(SA)', color: '#3b3f4f', yAxisIndex: 0, chartType: 'line' },
     },
   },
   nonfarm: {
@@ -34,8 +34,8 @@ const DASHBOARDS = {
     ],
     seriesOrder: ['series_0', 'series_1'],
     seriesMeta: {
-      series_0: { name: '非农就业（千人，年变动）', color: '#8e44ad', yAxisIndex: 0 },
-      series_1: { name: 'GDP（年变动，%）', color: '#16a085', yAxisIndex: 1 },
+      series_0: { name: '美国-非农就业人数(SA,年增,L)', color: '#3bafda', yAxisIndex: 0, chartType: 'line' },
+      series_1: { name: '美国-实际GDP(SA,同比,R)', color: '#e9573f', yAxisIndex: 1, chartType: 'bar' },
     },
   },
 };
@@ -123,9 +123,10 @@ function buildSeries(rows, config) {
 
     return {
       name: meta.name,
-      type: 'line',
-      smooth: 0.2,
+      type: meta.chartType || 'line',
+      smooth: (meta.chartType || 'line') === 'line' ? 0.2 : 0,
       showSymbol: false,
+      barMaxWidth: (meta.chartType || 'line') === 'bar' ? 16 : undefined,
       lineStyle: { width: 2, color: meta.color },
       emphasis: { focus: 'series' },
       yAxisIndex: meta.yAxisIndex || 0,
