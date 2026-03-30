@@ -34,8 +34,8 @@ const DASHBOARDS = {
     ],
     seriesOrder: ['series_0', 'series_1'],
     seriesMeta: {
-      series_0: { name: '美国-非农就业人数(SA,年增,L)', color: '#3bafda', yAxisIndex: 0, chartType: 'line' },
-      series_1: { name: '美国-实际GDP(SA,同比,R)', color: '#e9573f', yAxisIndex: 1, chartType: 'bar' },
+      series_0: { name: '美国-非农就业人数(SA,年增,L)', color: '#3bafda', yAxisIndex: 0, chartType: 'line', unit: 'k', deltaUnit: 'k' },
+      series_1: { name: '美国-实际GDP(SA,同比,R)', color: '#e9573f', yAxisIndex: 1, chartType: 'bar', unit: 'pct', deltaUnit: 'pp' },
     },
   },
 };
@@ -46,6 +46,19 @@ let parsedRows = [];
 
 function fmtNumber(v) {
   return new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(v);
+}
+
+function fmtValue(v, unit = '') {
+  if (unit === 'k') return `${fmtNumber(v)}K`;
+  if (unit === 'pct') return `${v.toFixed(1)}%`;
+  return fmtNumber(v);
+}
+
+function fmtDelta(delta, deltaUnit = '') {
+  const sign = delta > 0 ? '+' : '';
+  if (deltaUnit === 'k') return `${sign}${fmtNumber(delta)}K`;
+  if (deltaUnit === 'pp') return `${sign}${delta.toFixed(1)}pp`;
+  return `${sign}${fmtNumber(delta)}`;
 }
 
 function fmtDate(d) {
@@ -89,16 +102,23 @@ function renderCards(rows, config) {
     const subset = rows.filter((r) => r.series_label === label);
     if (!subset.length) return;
     const last = subset[subset.length - 1];
+    const prev = subset.length > 1 ? subset[subset.length - 2] : null;
     const meta = config.seriesMeta[label] || {
       name: label,
       color: '#2c3e50',
+      unit: '',
+      deltaUnit: '',
     };
+    const compareText = prev
+      ? `前值：${fmtValue(prev.value, meta.unit)} | 变动：${fmtDelta(last.value - prev.value, meta.deltaUnit || meta.unit)}`
+      : '前值：N/A';
 
     const div = document.createElement('div');
     div.className = 'card';
     div.innerHTML = `
       <div class="label">${meta.name}</div>
-      <div class="value" style="color:${meta.color}">${fmtNumber(last.value)}</div>
+      <div class="value" style="color:${meta.color}">${fmtValue(last.value, meta.unit)}</div>
+      <div class="date">${compareText}</div>
       <div class="date">最新日期：${fmtDate(last.date)}</div>
     `;
     cardsEl.appendChild(div);
@@ -160,7 +180,7 @@ function renderChart(rows, config) {
             type: 'value',
             name: '非农（千人）',
             nameTextStyle: { color: '#667085' },
-            axisLabel: { color: '#667085', formatter: (v) => `${v}` },
+            axisLabel: { color: '#667085', formatter: (v) => `${v}K` },
             splitLine: { lineStyle: { color: '#e4e7ec', type: 'dashed' } },
           },
           {
